@@ -12,6 +12,10 @@ public class Bank {
     private final int initialBalance;
     private final int numAccounts;
     private boolean open;
+    //boolean flag for transferring
+    private static boolean transferring;
+    //boolean flag for testing
+    private static boolean testing;
 
     public Bank(int numAccounts, int initialBalance) {
         open = true;
@@ -33,22 +37,33 @@ public class Bank {
         if (shouldTest()) test();
     }
 
-    public void test() {
-        int sum = 0;
-        for (Account account : accounts) {
-            System.out.printf("%s %s%n", 
-                    Thread.currentThread().toString(), account.toString());
-            sum += account.getBalance();
+    public  void test() {
+
+        if(isTransferring()) {
+            return;
         }
-        System.out.println(Thread.currentThread().toString() + 
-                " Sum: " + sum);
-        if (sum != numAccounts * initialBalance) {
-            System.out.println(Thread.currentThread().toString() + 
-                    " Money was gained or lost");
-            System.exit(1);
-        } else {
-            System.out.println(Thread.currentThread().toString() + 
-                    " The bank is in balance");
+        else {
+            setTesting(true);
+            int sum = 0;
+            for (Account account : accounts) {
+                System.out.printf("%s %s%n",
+                        Thread.currentThread().toString(), account.toString());
+                sum += account.getBalance();
+
+            }
+            System.out.println(Thread.currentThread().toString() +
+                    " Sum: " + sum);
+
+            if (sum != numAccounts * initialBalance) {
+                System.out.println(Thread.currentThread().toString() +
+                        " Money was gained or lost");
+                System.exit(1);
+            } else {
+                System.out.println(Thread.currentThread().toString() +
+                        " The bank is in balance");
+            }
+            setTesting(false);
+
         }
     }
 
@@ -73,4 +88,19 @@ public class Bank {
         return ++ntransacts % NTEST == 0;
     }
 
+    public boolean isTesting() {
+        return testing;
+    }
+
+    public void setTesting(boolean testing) {
+        this.testing = testing;
+    }
+
+    public boolean isTransferring() {
+        return transferring;
+    }
+
+    public void setTransferring(boolean transferring) {
+        this.transferring = transferring;
+    }
 }

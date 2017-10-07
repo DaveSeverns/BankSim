@@ -6,6 +6,8 @@ package edu.temple.cis.c3238.banksim;
  */
 public class BankSimMain {
 
+    private static int i = 0;
+
     public static final int NACCOUNTS = 10;
     public static final int INITIAL_BALANCE = 10000;
 
@@ -26,6 +28,7 @@ public class BankSimMain {
             }
         }
         b.test();
+        System.out.println("Thread: "+ i++);
     }
 }
 
