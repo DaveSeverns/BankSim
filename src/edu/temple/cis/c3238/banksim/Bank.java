@@ -1,8 +1,18 @@
 package edu.temple.cis.c3238.banksim;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * @author Cay Horstmann
  * @author Modified by Paul Wolfgang
+ *
+ * @author davidseverns --added ReentrantLock to control access to the sum of the accounts between threads and transfers
+ * If a transfer is taking place the transfer thread will lock other threads from testing and if the transfers are done the
+ * they will unlock the lock and allow for a test thread to start. before the test thread starts the they will try and aquire the lock
+ * if its free they will lock the transfer threads so they can compute the sum and do the test.
+ *
+ * SUCCESSFUL in calculations for 100000 transaction transfer threads minus the ones that return cause the bank is closed error discused
+ * in class but not resolved
  */
 public class Bank {
 
@@ -12,6 +22,9 @@ public class Bank {
     private final int initialBalance;
     private final int numAccounts;
     private boolean open;
+    private long activeTransfers = 0;
+    public ReentrantLock lock;
+
 
     public Bank(int numAccounts, int initialBalance) {
         open = true;
@@ -22,34 +35,30 @@ public class Bank {
             accounts[i] = new Account(this, i, initialBalance);
         }
         ntransacts = 0;
+        lock = new ReentrantLock();
     }
 
     public void transfer(int from, int to, int amount) {
         accounts[from].waitForAvailableFunds(amount);
+
         if (!open) return;
+        //activeTransfers++;
+        lock.lock();
         if (accounts[from].withdraw(amount)) {
             accounts[to].deposit(amount);
+            //activeTransfers--;
         }
-        if (shouldTest()) test();
+        lock.unlock();
+        if (shouldTest() ){
+
+            test();
+
+        }
     }
 
-    public void test() {
-        int sum = 0;
-        for (Account account : accounts) {
-            System.out.printf("%s %s%n", 
-                    Thread.currentThread().toString(), account.toString());
-            sum += account.getBalance();
-        }
-        System.out.println(Thread.currentThread().toString() + 
-                " Sum: " + sum);
-        if (sum != numAccounts * initialBalance) {
-            System.out.println(Thread.currentThread().toString() + 
-                    " Money was gained or lost");
-            System.exit(1);
-        } else {
-            System.out.println(Thread.currentThread().toString() + 
-                    " The bank is in balance");
-        }
+   public void test() {
+        Thread testThread = new BankTestThread(this,accounts,activeTransfers);
+        testThread.start();
     }
 
     public int size() {
@@ -73,4 +82,11 @@ public class Bank {
         return ++ntransacts % NTEST == 0;
     }
 
+    public int getInitialBalance() {
+        return initialBalance;
+    }
+
+    public int getNumAccounts() {
+        return numAccounts;
+    }
 }
