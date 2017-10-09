@@ -23,6 +23,7 @@ public class Bank {
     private final int numAccounts;
     private boolean open;
     private long activeTransfers = 0;
+    //protect critical sections in code with this lock
     public ReentrantLock lock;
 
 
@@ -43,6 +44,8 @@ public class Bank {
 
         if (!open) return;
         //activeTransfers++;
+
+        //try to aquire lock and lock out any testing threads
         lock.lock();
         if (accounts[from].withdraw(amount)) {
             accounts[to].deposit(amount);
