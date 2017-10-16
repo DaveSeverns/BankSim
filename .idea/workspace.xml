@@ -325,7 +325,7 @@
       <workItem from="1508028043447" duration="1152000" />
       <workItem from="1508091216138" duration="1687000" />
       <workItem from="1508158121250" duration="2400000" />
-      <workItem from="1508166227980" duration="455000" />
+      <workItem from="1508166227980" duration="487000" />
     </task>
     <task id="LOCAL-00001" summary="Attempted to create a runnable object to be the sum testing thread">
       <created>1507136404394</created>
@@ -383,11 +383,18 @@
       <option name="project" value="LOCAL" />
       <updated>1508166286109</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Changed the lock to a semaphore with ten permits to force the problem to work. the transfer threads will acquire and release the  permits, and the test thread will wait until there are 10 available before it run, since it has all ten the transfers will stop and wait till the test is done.">
+      <created>1508167947471</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1508167947471</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="39381000" />
+    <option name="totallyTimeSpent" value="39413000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
