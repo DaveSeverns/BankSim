@@ -1,5 +1,6 @@
 package edu.temple.cis.c3238.banksim;
 
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -26,6 +27,11 @@ public class Bank {
     //protect critical sections in code with this lock
     public ReentrantLock lock;
 
+    //will act as a "door man between the transfer and test threads. will allow 10 transfer threads in for
+    // 10 permits but a test thread will need all 10 permits to run
+    //trying this because skeptical if the reentrant lock is concurrent
+    public final Semaphore semaDoorMan;
+
 
     public Bank(int numAccounts, int initialBalance) {
         open = true;
@@ -36,6 +42,7 @@ public class Bank {
             accounts[i] = new Account(this, i, initialBalance);
         }
         ntransacts = 0;
+        semaDoorMan = new Semaphore(numAccounts);
         lock = new ReentrantLock();
     }
 
@@ -45,13 +52,24 @@ public class Bank {
         if (!open) return;
         //activeTransfers++;
 
-        //try to aquire lock and lock out any testing threads
-        lock.lock();
-        if (accounts[from].withdraw(amount)) {
-            accounts[to].deposit(amount);
-            //activeTransfers--;
+        //try to aquire a permit from the door man
+
+        try{
+            semaDoorMan.acquire();
+            //try to aquire lock and lock out any testing threads
+            //lock.lock();
+            if (accounts[from].withdraw(amount)) {
+                accounts[to].deposit(amount);
+                //activeTransfers--;
+            }
+        }catch (InterruptedException e){
+
+        }finally {
+            //releases a permit to be aquired by another thread(test thread)
+            semaDoorMan.release();
         }
-        lock.unlock();
+
+        //lock.unlock();
         if (shouldTest() ){
 
             test();

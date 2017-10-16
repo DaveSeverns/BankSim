@@ -27,15 +27,27 @@ public class BankTestThread extends Thread{
 
         //using the Reentrant lock from bank class to lock down all other threads using the bank object,
         //unlocking object after critical section where the sum is being altered
-        bank.lock.lock();
+        //bank.lock.lock();
         int sum = 0;
-        for (Account account : accounts) {
-            System.out.printf("%s %s%n",
-                    Thread.currentThread().toString(), account.toString());
-            sum += account.getBalance();
+        try{
+            //in the test thread we need to wait until  10 permits are available this thread will only test
+            //when it can aquire 10 it will begin the test and lock out all transfer threads
+            bank.semaDoorMan.acquire(10);
+            for (Account account : accounts) {
+                System.out.printf("%s %s%n",
+                        Thread.currentThread().toString(), account.toString());
+                sum += account.getBalance();
+            }
+        }catch(InterruptedException e){
+
+        }finally {
+            //once the test is done the test can give its permits back to the door man and the door man will
+            //release them to waiting transfer threads
+            bank.semaDoorMan.release(10);
         }
+
         //sum is calculated and we can test the sum and allow any waiting transfer threads to execute
-        bank.lock.unlock();
+        //bank.lock.unlock();
         System.out.println(Thread.currentThread().toString() +
                 " Sum: " + sum);
         if (sum != bank.getNumAccounts() * bank.getInitialBalance()) {
