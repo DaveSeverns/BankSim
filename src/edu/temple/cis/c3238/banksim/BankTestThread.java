@@ -5,6 +5,14 @@ package edu.temple.cis.c3238.banksim;
  * Creating thread object for testing the sum in the bank sim
  * Utilizing the ReentrantLock from the bank to protect the test threads from the
  * transfer threads
+ *
+ * ***********
+ * Changed the lock to a semaphore with ten permits to
+ * force the problem to work. the transfer threads will acquire and release the
+ * permits, and the test thread will wait until there are 10 available before it run,
+ * since it has all ten the transfers will stop and wait till the test is done.
+ *
+ *
  */
 public class BankTestThread extends Thread{
 
